@@ -1,52 +1,44 @@
 
-# Rock, Paper, Scissors is a two player game where each player
-# chooses one of three possible moves: rock, paper or scissors. The chosen
-# moves will then be compard to see who wins, according to the following rules:
-
-# -rock beats scissors
-# -scissors beats paper
-# -paper beats rock
-
-# If the players chose the same move, then it's a tie.
-
-# Nouns - player, rule, move
-# Verbs - choose, compare
-
-# Player
-# -choose
-# Move
-# Rule
-
-# -compare
-
 class RPSGame
   attr_accessor :human, :computer
 
   def initialize
+    system 'clear'
     @human = Human.new
     @computer = Computer.new
   end
 
   def play
+    system 'clear'
     display_welcome_message
     loop do
       loop do
-        human.choose
-        computer.choose
-        display_moves
-        keep_score
-        display_round_winner
+        core_game
         break if winner?
       end
       display_winner
+      display_move_history
       break unless play_again?
+      system 'clear'
     end
     display_goodbye_message
+  end
+
+  def core_game
+    human.choose
+    computer.choose
+    record_moves
+    system 'clear'
+    display_moves
+    keep_score
+    display_round_winner
+    display_score
   end
 
   def play_again?
     answer = nil
     loop do
+      puts ""
       puts "Would you like to play again? (y/n)"
       answer = gets.chomp
       break if ['y', 'n'].include? answer.downcase
@@ -70,19 +62,23 @@ class RPSGame
     puts "#{computer.name} chose #{computer.move}."
   end
 
-  # Complexity of method too high. Display score and win message seperately. 
   def display_round_winner
     if human.move > computer.move
-      puts "#{human.name} won the round! They have won #{human.score} rounds."
+      puts "#{human.name} won the round!"
     elsif human.move < computer.move
-      puts "#{computer.name} won the round! They have won #{human.score} rounds"
+      puts "#{computer.name} won the round!"
     else
       puts "It's a tie!"
     end
   end
 
+  def display_score
+    puts "#{human.name} has won #{human.score} rounds!"
+    puts "#{computer.name} has won #{computer.score} rounds!"
+  end
+
   def winner?
-    computer.score >= 10 || human.score >=10
+    computer.score >= 10 || human.score >= 10
   end
 
   def keep_score
@@ -100,14 +96,48 @@ class RPSGame
       puts "#{computer.name} wins the game!"
     end
   end
+
+  def record_moves
+    human.record_move
+    computer.record_move
+  end
+
+  def display_move_history
+    puts "#{human.name}'s moves: "
+    puts "#{human.move_history.join(', ').capitalize}."
+    puts " "
+    puts "#{computer.name}'s moves: "
+    puts "#{computer.move_history.join(', ').capitalize}."
+  end
 end
 
 class Player
-  attr_accessor :move, :name, :score
+  attr_accessor :name, :score, :move_history
+  attr_reader :move
 
   def initialize
     set_name
     @score = 0
+    @move_history = []
+  end
+
+  def move=(choice)
+    case choice
+    when 'rock'
+      @move = Rock.new
+    when 'paper'
+      @move = Paper.new
+    when 'scissors'
+      @move = Scissors.new
+    when 'lizard'
+      @move = Lizard.new
+    when 'spock'
+      @move = Spock.new
+    end
+  end
+
+  def record_move
+    move_history << move.to_s
   end
 end
 
@@ -131,7 +161,7 @@ class Human < Player
       break if Move::VALUES.include? choice
       puts "Sorry, invalid choice."
     end
-    self.move = Move.new(choice)
+    self.move = choice
   end
 end
 
@@ -141,55 +171,102 @@ class Computer < Player
   end
 
   def choose
-    self.move = Move.new(Move::VALUES.sample)
+    choice = Move::VALUES.sample
+    self.move = choice
   end
 end
 
 class Move
   VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
 
-  def initialize(value)
-    @value = value
-  end
-
   def scissors?
-    @value == 'scissors'
+    instance_of?(Scissors)
   end
 
   def rock?
-    @value == 'rock'
+    instance_of?(Rock)
   end
 
   def paper?
-    @value == 'paper'
+    instance_of?(Paper)
   end
 
   def spock?
-    @value == 'spock'
+    instance_of?(Spock)
   end
 
   def lizard?
-    @value == 'lizard'
+    instance_of?(Lizard)
   end
+end
 
+class Lizard < Move
   def >(other_move)
-    (rock? && (other_move.scissors? || other_move.lizard?)) ||
-      (paper? && (other_move.rock? || other_move.spock?)) ||
-      (scissors? && (other_move.paper? || other_move.lizard?)) ||
-      (lizard? && (other_move.paper? || other_move.spock?)) ||
-      (spock? && (other_move.rock? || other_move.scissors?))
+    other_move.spock? || other_move.paper?
   end
 
   def <(other_move)
-    (rock? && (other_move.paper? || other_move.spock?)) ||
-      (paper? && (other_move.scissors? || other_move.lizard?)) ||
-      (scissors? && (other_move.rock? || other_move.spock?)) ||
-      (lizard? && (other_move.rock? || other_move.scissors?)) ||
-      (spock? && (other_move.paper? || other_move.lizard?))
+    other_move.scissors? || other_move.rock?
   end
 
   def to_s
-    @value
+    'lizard'
+  end
+end
+
+class Rock < Move
+  def >(other_move)
+    other_move.scissors? || other_move.lizard?
+  end
+
+  def <(other_move)
+    other_move.paper? || other_move.spock?
+  end
+
+  def to_s
+    'rock'
+  end
+end
+
+class Paper < Move
+  def >(other_move)
+    other_move.rock? || other_move.spock?
+  end
+
+  def <(other_move)
+    other_move.scissors? || other_move.lizard?
+  end
+
+  def to_s
+    'paper'
+  end
+end
+
+class Scissors < Move
+  def >(other_move)
+    other_move.lizard? || other_move.paper?
+  end
+
+  def <(other_move)
+    other_move.rock? || other_move.rock?
+  end
+
+  def to_s
+    'scissors'
+  end
+end
+
+class Spock < Move
+  def >(other_move)
+    other_move.rock? || other_move.scissors?
+  end
+
+  def <(other_move)
+    other_move.lizard? || other_move.paper?
+  end
+
+  def to_s
+    'spock'
   end
 end
 
