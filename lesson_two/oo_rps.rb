@@ -23,7 +23,7 @@ class RPSGame
     end
     display_goodbye_message
   end
-  
+
   # seperated out code from main loop to reduce complexity of play method
 
   def core_game
@@ -52,7 +52,9 @@ class RPSGame
   end
 
   def display_welcome_message
-    puts "Welcome to Rock, Paper, Scissors, Lizard, Spock!"
+    puts "Hello #{human.name}. Welcome to Rock, Paper, Scissors, Lizard, Spock!"
+    puts "Your opponent is #{computer.name}."
+    puts "The first to 10 points wins the game!"
   end
 
   def display_goodbye_message
@@ -75,8 +77,10 @@ class RPSGame
   end
 
   def display_score
+    puts "---------------"
     puts "#{human.name} has won #{human.score} rounds!"
     puts "#{computer.name} has won #{computer.score} rounds!"
+    puts "---------------"
   end
 
   def winner?
