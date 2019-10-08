@@ -23,6 +23,8 @@ class RPSGame
     end
     display_goodbye_message
   end
+  
+  # seperated out code from main loop to reduce complexity of play method
 
   def core_game
     human.choose
