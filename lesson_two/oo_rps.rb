@@ -171,7 +171,21 @@ class Computer < Player
   end
 
   def choose
-    choice = Move::VALUES.sample
+    case @name
+    when 'Chappie'
+      choice = Move::VALUES.sample
+    when 'R2D2'
+      choice = 'rock'
+    when 'Hal'
+      choice = ['scissors', 'scissors', 'scissors', 'scissors',
+                'rock', 'lizard', 'spock'].sample
+    when 'Number 5'
+      choice = ['paper', 'paper', 'spock', 'spock', 'lizard',
+                'scissors'].sample
+    when 'Sonny'
+      choice = ['rock', 'paper', 'scissors'].sample
+    end
+
     self.move = choice
   end
 end
