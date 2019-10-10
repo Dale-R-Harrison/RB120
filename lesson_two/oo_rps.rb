@@ -5,20 +5,17 @@ class RPSGame
   def initialize
     system 'clear'
     @human = Human.new
-    @computer = Computer.new
   end
 
   def play
     system 'clear'
     display_welcome_message
     loop do
-      loop do
-        core_game
-        break if winner?
-      end
+      core_game
       display_winner
       display_move_history
       break unless play_again?
+      reset_game
       system 'clear'
     end
     display_goodbye_message
@@ -27,14 +24,24 @@ class RPSGame
   # seperated out code from main loop to reduce complexity of play method
 
   def core_game
-    human.choose
-    computer.choose
-    record_moves
-    system 'clear'
-    display_moves
-    keep_score
-    display_round_winner
-    display_score
+    loop do
+      human.choose
+      computer.choose
+      record_moves
+      system 'clear'
+      display_moves
+      keep_score
+      display_round_winner
+      display_score
+      break if winner?
+    end
+  end
+
+  def reset_game
+    human.score = 0
+    computer.score = 0
+    human.move_history = []
+    computer.move_history = []
   end
 
   def play_again?
@@ -69,7 +76,7 @@ class RPSGame
   def display_round_winner
     if human.move > computer.move
       puts "#{human.name} won the round!"
-    elsif human.move < computer.move
+    elsif computer.move > human.move
       puts "#{computer.name} won the round!"
     else
       puts "It's a tie!"
@@ -90,7 +97,7 @@ class RPSGame
   def keep_score
     if human.move > computer.move
       human.score += 1
-    elsif human.move < computer.move
+    elsif computer.move > human.move
       computer.score += 1
     end
   end
@@ -153,7 +160,7 @@ class Human < Player
     loop do
       puts "What's your name?"
       n = gets.chomp
-      break unless n.empty?
+      break unless n.empty? || n == ' '
       puts "Sorry, must enter a value."
     end
     self.name = n
@@ -225,10 +232,6 @@ class Lizard < Move
     other_move.spock? || other_move.paper?
   end
 
-  def <(other_move)
-    other_move.scissors? || other_move.rock?
-  end
-
   def to_s
     'lizard'
   end
@@ -237,10 +240,6 @@ end
 class Rock < Move
   def >(other_move)
     other_move.scissors? || other_move.lizard?
-  end
-
-  def <(other_move)
-    other_move.paper? || other_move.spock?
   end
 
   def to_s
@@ -253,10 +252,6 @@ class Paper < Move
     other_move.rock? || other_move.spock?
   end
 
-  def <(other_move)
-    other_move.scissors? || other_move.lizard?
-  end
-
   def to_s
     'paper'
   end
@@ -267,10 +262,6 @@ class Scissors < Move
     other_move.lizard? || other_move.paper?
   end
 
-  def <(other_move)
-    other_move.rock? || other_move.rock?
-  end
-
   def to_s
     'scissors'
   end
@@ -279,10 +270,6 @@ end
 class Spock < Move
   def >(other_move)
     other_move.rock? || other_move.scissors?
-  end
-
-  def <(other_move)
-    other_move.lizard? || other_move.paper?
   end
 
   def to_s
