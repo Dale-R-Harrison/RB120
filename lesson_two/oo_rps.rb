@@ -1,10 +1,9 @@
 
 class RPSGame
-  attr_accessor :human, :computer
-
   def initialize
     system 'clear'
     @human = Human.new
+    opponent_select
   end
 
   def play
@@ -122,11 +121,32 @@ class RPSGame
     puts "#{computer.name}'s moves: "
     puts "#{computer.move_history.join(', ').capitalize}."
   end
+
+  def opponent_select
+    n = Computer::NAMES.sample
+
+    case n
+    when 'Chappie'
+      @computer = Chappie.new
+    when 'R2D2'
+      @computer = R2D2.new
+    when 'Sonny'
+      @computer = Sonny.new
+    when 'Hal'
+      @computer = Hal.new
+    when 'Number 5'
+      @computer = Number5.new
+    end
+  end
+
+  private
+
+  attr_reader :human, :computer
 end
 
 class Player
-  attr_accessor :name, :score, :move_history
-  attr_reader :move
+  attr_accessor :score, :move_history
+  attr_reader :move, :name
 
   def initialize
     set_name
@@ -152,6 +172,10 @@ class Player
   def record_move
     move_history << move.to_s
   end
+
+  protected
+
+  attr_writer :name
 end
 
 class Human < Player
@@ -179,27 +203,58 @@ class Human < Player
 end
 
 class Computer < Player
+  NAMES = ['R2D2', 'Hal', 'Chappie', 'Sonny', 'Number 5']
+
   def set_name
-    self.name = ['R2D2', 'Hal', 'Chappie', 'Sonny', 'Number 5'].sample
+    self.name = NAMES.sample
   end
 
   def choose
-    case @name
-    when 'Chappie'
-      choice = Move::VALUES.sample
-    when 'R2D2'
-      choice = 'rock'
-    when 'Hal'
-      choice = ['scissors', 'scissors', 'scissors', 'scissors',
-                'rock', 'lizard', 'spock'].sample
-    when 'Number 5'
-      choice = ['paper', 'paper', 'spock', 'spock', 'lizard',
-                'scissors'].sample
-    when 'Sonny'
-      choice = ['rock', 'paper', 'scissors'].sample
-    end
+    self.move = Move::VALUES.sample
+  end
+end
 
-    self.move = choice
+class Chappie < Computer
+  def set_name
+    @name = 'Chappie'
+  end
+end
+
+class R2D2 < Computer
+  def choose
+    self.move = 'rock'
+  end
+end
+
+class Hal < Computer
+  def choose
+    self.move = ['scissors', 'scissors', 'scissors', 'scissors',
+                 'rock', 'lizard', 'spock'].sample
+  end
+
+  def set_name
+    @name = 'Hal'
+  end
+end
+
+class Number5 < Computer
+  def choose
+    self.move = ['paper', 'paper', 'spock', 'spock', 'lizard',
+                 'scissors'].sample
+  end
+
+  def set_name
+    @name = 'Number 5'
+  end
+end
+
+class Sonny < Computer
+  def choose
+    self.move = ['rock', 'paper', 'scissors'].sample
+  end
+
+  def set_name
+    @name = 'Sonny'
   end
 end
 
